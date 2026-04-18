@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 generate_docx.py — Word document generator for Microsoft 365 Copilot agents.
-Bilingual labels: English ("en") and German ("de"), chosen via the top-level
-`lang` field in the JSON config. Defaults to "en" when unset.
+Trilingual labels: English ("en"), French ("fr") and German ("de"), chosen via
+the top-level `lang` field in the JSON config. Defaults to "en" when unset.
 
 Usage: python generate_docx.py <config.json> <output.docx>
 """
@@ -59,6 +59,17 @@ CAPABILITIES_LABELS = {
         "CodeInterpreter":       "💻 Code interpreter",
         "Dataverse":             "🗄️ Dataverse",
     },
+    "fr": {
+        "WebSearch":             "🔍 Recherche web",
+        "OneDriveAndSharePoint": "📁 OneDrive & SharePoint",
+        "Email":                 "📧 E-mail",
+        "TeamsMessages":         "💬 Messages Teams",
+        "People":                "👥 Personnes",
+        "Meetings":              "📅 Réunions",
+        "GraphicArt":            "🎨 Création d'images",
+        "CodeInterpreter":       "💻 Interpréteur de code",
+        "Dataverse":             "🗄️ Dataverse",
+    },
     "de": {
         "WebSearch":             "🔍 Websuche",
         "OneDriveAndSharePoint": "📁 OneDrive & SharePoint",
@@ -74,6 +85,49 @@ CAPABILITIES_LABELS = {
 
 # ── UI text per language ────────────────────────────────────────────────────────
 LABELS = {
+    "fr": {
+        "default_agent_name":   "Mon agent Copilot",
+        "date_format":          "%d/%m/%Y",
+        "supertitle":           "MICROSOFT 365 COPILOT — AGENT BUILDER",
+        "subtitle":             "Configuration complète — prête à coller dans Agent Builder",
+        "generated_on":         "Généré le {date}   ·   https://m365.cloud.microsoft/chat/agent/new",
+        "not_set":              "(non renseigné)",
+        "char_unit":            "caractères",
+        "section_identity":     "Identité de l'agent",
+        "section_instructions": "Instructions",
+        "section_capabilities": "Fonctionnalités à activer",
+        "section_sources":      "Sources de connaissances",
+        "section_starters":     "Suggestions de démarrage",
+        "section_disclaimer":   "Disclaimer",
+        "field_name":           "Nom",
+        "field_description":    "Description",
+        "field_instructions":   "Instructions",
+        "field_capabilities":   "Fonctionnalités",
+        "field_sources":        "Sources (URLs SharePoint / sites web)",
+        "field_starters":       "Suggestions de démarrage",
+        "field_disclaimer":     "Message affiché au démarrage",
+        "hint_name":            "Copiez ce nom dans le champ « Nom » de l'Agent Builder.",
+        "hint_description":     "Cette description est visible par les utilisateurs qui parcourent la liste des agents.",
+        "hint_instructions":    "Le champ le plus important. Collez l'intégralité du contenu dans le champ « Instructions ». Affinez après vos premiers tests.",
+        "hint_capabilities":    "Activez ces fonctionnalités dans l'onglet « Fonctionnalités » de l'Agent Builder.",
+        "hint_sources":         "Ajoutez ces sources dans l'onglet « Connaissances ». Vérifiez que vos utilisateurs ont accès aux documents sous-jacents.",
+        "hint_disclaimer":      "Ce texte est affiché à l'utilisateur au début de chaque conversation.",
+        "no_capabilities":      "(aucune fonctionnalité spécifiée)",
+        "starter_count":        "{n} suggestions de démarrage configurées   ·   maximum 12",
+        "checklist_title":      "CHECKLIST DE MISE EN LIGNE",
+        "checklist_items": [
+            ("Ouvrir l'Agent Builder",              "https://m365.cloud.microsoft/chat/agent/new"),
+            ("Renseigner le Nom et la Description", "Champs 1 et 2"),
+            ("Coller les Instructions",             "Le champ le plus important — coller en intégralité"),
+            ("Activer les Fonctionnalités",         "Onglet « Fonctionnalités »"),
+            ("Ajouter les Sources de connaissances","SharePoint / OneDrive — onglet « Connaissances »"),
+            ("Saisir les Suggestions de démarrage", "Jusqu'à 12 suggestions"),
+            ("Tester en mode Aperçu",               "Lancer quelques suggestions, affiner si nécessaire"),
+            ("Publier et partager",                 "Diffuser auprès des utilisateurs cibles"),
+        ],
+        "footer":               "Document généré le {date}   ·   Microsoft 365 Copilot Agent Builder   ·   https://m365.cloud.microsoft/chat/agent/new",
+        "success":              "✅ Document généré : {path}",
+    },
     "en": {
         "default_agent_name":   "My Copilot Agent",
         "date_format":          "%Y-%m-%d",

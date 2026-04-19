@@ -15,7 +15,7 @@ To test the doc generator in isolation:
 python scripts/generate_docx.py /tmp/agent_config.json ./test_output.docx
 ```
 
-The script auto-installs `python-docx` if missing.
+`python-docx` auto-installs via `subprocess` if missing (see top of `generate_docx.py`).
 
 ## Architecture
 
@@ -28,16 +28,16 @@ The script auto-installs `python-docx` if missing.
    - Phase 3: Six sequential field proposals (name/description → instructions → capabilities → knowledge sources → starter prompts → disclaimer), each proposed then validated before advancing
    - Phase 4: Collects validated data, writes `/tmp/agent_config.json`, calls `generate_docx.py`
 
-2. **`scripts/generate_docx.py`** — Reads JSON config, generates a formatted `.docx`. The `lang` field ("en"/"fr"/"de") switches all UI strings. Has fallback keys for backward compatibility with legacy French JSON keys (`nom`, `fonctionnalites`, etc.).
+2. **`scripts/generate_docx.py`** — Reads JSON config, generates a formatted `.docx`. The `lang` field ("en"/"fr"/"de") switches all UI strings. Uses a `_get(config, *keys)` helper that falls back through multiple key names for backward compatibility with legacy French JSON keys (`nom`, `fonctionnalites`, `sources_connaissances`, `suggestions_demarrage`).
 
 **JSON config structure** passed between skill and generator:
 ```json
 {
-  "lang": "en" | "de",
+  "lang": "en" | "fr" | "de",
   "name": "...",
   "description": "...",
   "instructions": "...",
-  "capabilities": ["WebSearch", "OneDriveAndSharePoint", ...],
+  "capabilities": ["WebSearch", "OneDriveAndSharePoint", "..."],
   "knowledge_sources": ["url1", ...],
   "starters": [{"title": "...", "text": "..."}, ...],
   "disclaimer": "..."
@@ -63,6 +63,25 @@ The script auto-installs `python-docx` if missing.
 | Instructions | 8,000 chars |
 | Starter prompts | 12 max |
 | Disclaimer | 500 chars |
+
+## Capabilities (Agent Builder)
+
+All capabilities supported by the generator — use exact key strings in the JSON:
+
+| Key | EN label |
+|---|---|
+| `WebSearch` | Web search |
+| `OneDriveAndSharePoint` | OneDrive & SharePoint |
+| `Email` | Email |
+| `TeamsMessages` | Teams messages |
+| `People` | People |
+| `Meetings` | Meetings |
+| `GraphicArt` | Image creation |
+| `CodeInterpreter` | Code interpreter |
+| `Dataverse` | Dataverse |
+
+Unknown keys pass through as-is (no label translation).
+
 
 ## Installation
 

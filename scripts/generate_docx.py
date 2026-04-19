@@ -219,6 +219,22 @@ LABELS = {
 
 # ── XML helpers ─────────────────────────────────────────────────────────────────
 
+# Pre-compute qualified names to avoid repeated qn() calls (micro-optimization)
+_QN_RFONTS = qn('w:rFonts')
+_QN_ASCII = qn('w:ascii')
+_QN_HANSI = qn('w:hAnsi')
+_QN_EASTASIA = qn('w:eastAsia')
+_QN_CS = qn('w:cs')
+_QN_VAL = qn('w:val')
+_QN_SZ = qn('w:sz')
+_QN_SPACE = qn('w:space')
+_QN_COLOR = qn('w:color')
+_QN_PBDR = qn('w:pBdr')
+_QN_BOTTOM = qn('w:bottom')
+_QN_LEFT = qn('w:left')
+_QN_SHD = qn('w:shd')
+_QN_FILL = qn('w:fill')
+
 def set_run_font(run, font_name, size_pt, bold=False, color=None, italic=False):
     run.font.name = font_name
     run.font.size = Pt(size_pt)
@@ -227,14 +243,17 @@ def set_run_font(run, font_name, size_pt, bold=False, color=None, italic=False):
     if color:
         run.font.color.rgb = color
     rPr = run._r.get_or_add_rPr()
-    rFonts = OxmlElement('w:rFonts')
-    rFonts.set(qn('w:ascii'),   font_name)
-    rFonts.set(qn('w:hAnsi'),   font_name)
-    rFonts.set(qn('w:eastAsia'),font_name)
-    rFonts.set(qn('w:cs'),      font_name)
-    existing = rPr.find(qn('w:rFonts'))
+
+    # Check if rFonts already exists before creating new one
+    existing = rPr.find(_QN_RFONTS)
     if existing is not None:
         rPr.remove(existing)
+
+    rFonts = OxmlElement('w:rFonts')
+    rFonts.set(_QN_ASCII,    font_name)
+    rFonts.set(_QN_HANSI,    font_name)
+    rFonts.set(_QN_EASTASIA, font_name)
+    rFonts.set(_QN_CS,       font_name)
     rPr.insert(0, rFonts)
 
 
@@ -245,10 +264,10 @@ def add_rule(doc, before_pt=6, after_pt=12, color=RULE_COLOR):
     pPr = p._p.get_or_add_pPr()
     pBdr = OxmlElement('w:pBdr')
     bottom = OxmlElement('w:bottom')
-    bottom.set(qn('w:val'),   'single')
-    bottom.set(qn('w:sz'),    '4')
-    bottom.set(qn('w:space'), '1')
-    bottom.set(qn('w:color'), color)
+    bottom.set(_QN_VAL,   'single')
+    bottom.set(_QN_SZ,    '4')
+    bottom.set(_QN_SPACE, '1')
+    bottom.set(_QN_COLOR, color)
     pBdr.append(bottom)
     pPr.append(pBdr)
     return p
@@ -256,30 +275,30 @@ def add_rule(doc, before_pt=6, after_pt=12, color=RULE_COLOR):
 
 def set_para_shading(para, fill_hex):
     pPr = para._p.get_or_add_pPr()
-    shd = OxmlElement('w:shd')
-    shd.set(qn('w:val'),   'clear')
-    shd.set(qn('w:color'), 'auto')
-    shd.set(qn('w:fill'),  fill_hex)
-    existing = pPr.find(qn('w:shd'))
+    existing = pPr.find(_QN_SHD)
     if existing is not None:
         pPr.remove(existing)
+    shd = OxmlElement('w:shd')
+    shd.set(_QN_VAL,   'clear')
+    shd.set(_QN_COLOR, 'auto')
+    shd.set(_QN_FILL,  fill_hex)
     pPr.append(shd)
 
 
 def add_left_border(para, color_hex="FF5119", size="12"):
     pPr = para._p.get_or_add_pPr()
-    pBdr = pPr.find(qn('w:pBdr'))
+    pBdr = pPr.find(_QN_PBDR)
     if pBdr is None:
         pBdr = OxmlElement('w:pBdr')
         pPr.append(pBdr)
+    existing_left = pBdr.find(_QN_LEFT)
+    if existing_left is not None:
+        pBdr.remove(existing_left)
     left = OxmlElement('w:left')
-    left.set(qn('w:val'),   'single')
-    left.set(qn('w:sz'),    size)
-    left.set(qn('w:space'), '12')
-    left.set(qn('w:color'), color_hex)
-    existing = pBdr.find(qn('w:left'))
-    if existing is not None:
-        pBdr.remove(existing)
+    left.set(_QN_VAL,   'single')
+    left.set(_QN_SZ,    size)
+    left.set(_QN_SPACE, '12')
+    left.set(_QN_COLOR, color_hex)
     pBdr.append(left)
 
 
@@ -293,13 +312,14 @@ def add_section_title(doc, text, emoji=""):
     run = p.add_run(label)
     set_run_font(run, FONT_TITLE, SIZE_H1, bold=True, color=ORANGE)
 
+    # Add bottom border using pre-computed qn values
     pPr = p._p.get_or_add_pPr()
     pBdr = OxmlElement('w:pBdr')
     bottom = OxmlElement('w:bottom')
-    bottom.set(qn('w:val'),   'single')
-    bottom.set(qn('w:sz'),    '6')
-    bottom.set(qn('w:space'), '4')
-    bottom.set(qn('w:color'), 'FF5119')
+    bottom.set(_QN_VAL,   'single')
+    bottom.set(_QN_SZ,    '6')
+    bottom.set(_QN_SPACE, '4')
+    bottom.set(_QN_COLOR, 'FF5119')
     pBdr.append(bottom)
     pPr.append(pBdr)
     return p
@@ -319,21 +339,30 @@ def add_field_block(doc, field_name, content, char_limit=None, hint=None,
         sep = label_p.add_run(f"   {count} / {char_limit} {char_unit}")
         set_run_font(sep, FONT_TITLE, SIZE_META, color=GRAY)
 
-    lines = (content or not_set_text).split('\n')
+    is_empty = not content
+    display_text = content or not_set_text
+    lines = display_text.split('\n')
+
+    # Pre-compute formatting parameters to avoid repeated calculations in loop
+    font_color = GRAY if is_empty else DARK
+    left_indent = Cm(0.4)
+    right_indent = Cm(0.2)
+    space_before_subsequent = Pt(2)
+    space_after = Pt(2)
+
     for i, line in enumerate(lines):
         cp = doc.add_paragraph()
-        cp.paragraph_format.space_before = Pt(2) if i > 0 else Pt(0)
-        cp.paragraph_format.space_after  = Pt(2)
-        cp.paragraph_format.left_indent  = Cm(0.4)
-        cp.paragraph_format.right_indent = Cm(0.2)
+        cp.paragraph_format.space_before = space_before_subsequent if i > 0 else Pt(0)
+        cp.paragraph_format.space_after  = space_after
+        cp.paragraph_format.left_indent  = left_indent
+        cp.paragraph_format.right_indent = right_indent
 
         run = cp.add_run(line if line.strip() else " ")
-        is_empty = not content
         set_run_font(
             run,
             FONT_BODY,
             SIZE_BODY,
-            color=GRAY if is_empty else DARK,
+            color=font_color,
             italic=is_empty
         )
         set_para_shading(cp, "F5F5F5")
@@ -371,10 +400,7 @@ def add_suggestion_block(doc, index, title, text):
 
 def _get(config, *keys, default=""):
     """Return the first present non-empty value among keys in config."""
-    for k in keys:
-        if k in config and config[k] not in (None, ""):
-            return config[k]
-    return default
+    return next((config[k] for k in keys if k in config and config[k] not in (None, "")), default)
 
 
 def generate_document(config: dict, output_path: str):
@@ -455,8 +481,11 @@ def generate_document(config: dict, output_path: str):
     add_section_title(doc, L["section_capabilities"], "⚙️")
 
     caps = _get(config, "capabilities", "fonctionnalites", default=[]) or []
-    caps_text = "\n".join([f"✅  {caps_labels.get(c, c)}" for c in caps]) \
-        if caps else L["no_capabilities"]
+    # Build capabilities text more efficiently
+    if caps:
+        caps_text = "\n".join(f"✅  {caps_labels.get(c, c)}" for c in caps)
+    else:
+        caps_text = L["no_capabilities"]
 
     add_field_block(doc, L["field_capabilities"], caps_text,
                     hint=L["hint_capabilities"],

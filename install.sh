@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+command -v curl >/dev/null 2>&1    || { echo "Error: curl is required but not installed."; exit 1; }
+command -v python3 >/dev/null 2>&1 || { echo "Error: Python 3 is required but not installed."; exit 1; }
+
 SKILL_NAME="copilot-agent-builder"
 BASE_URL="https://raw.githubusercontent.com/Paaaddy/lns-skill-copilot-agent-builder/main"
 

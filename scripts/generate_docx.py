@@ -21,7 +21,7 @@ try:
 except ImportError:
     print("Installing python-docx...")
     import subprocess
-    subprocess.run([sys.executable, "-m", "pip", "install", "python-docx", "--break-system-packages", "-q"])
+    subprocess.run([sys.executable, "-m", "pip", "install", "python-docx", "--user", "-q"])
     from docx import Document
     from docx.shared import Pt, Cm, RGBColor
     from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -37,14 +37,16 @@ LIGHT_GRAY  = RGBColor(0xF5, 0xF5, 0xF5)
 RULE_COLOR  = "DDDDDD"
 
 # ── Typography ─────────────────────────────────────────────────────────────────
-FONT_TITLE  = "Outfit"
-FONT_BODY   = "Petrona"
+FONT_TITLE  = "Calibri"
+FONT_BODY   = "Georgia"
 SIZE_HERO   = 28
 SIZE_H1     = 16
 SIZE_H2     = 12
 SIZE_BODY   = 11
 SIZE_META   = 9
 SIZE_SMALL  = 8
+
+VERSION     = "2.0.0"
 
 # ── Capability labels per language ──────────────────────────────────────────────
 CAPABILITIES_LABELS = {
@@ -99,6 +101,7 @@ LABELS = {
         "section_sources":      "Sources de connaissances",
         "section_starters":     "Suggestions de démarrage",
         "section_disclaimer":   "Disclaimer",
+        "section_next_steps":   "Prochaines étapes recommandées",
         "field_name":           "Nom",
         "field_description":    "Description",
         "field_instructions":   "Instructions",
@@ -125,7 +128,7 @@ LABELS = {
             ("Tester en mode Aperçu",               "Lancer quelques suggestions, affiner si nécessaire"),
             ("Publier et partager",                 "Diffuser auprès des utilisateurs cibles"),
         ],
-        "footer":               "Document généré le {date}   ·   Microsoft 365 Copilot Agent Builder   ·   https://m365.cloud.microsoft/chat/agent/new",
+        "footer":               "Document généré le {date}   ·   Microsoft 365 Copilot Agent Builder   ·   v{version}",
         "success":              "✅ Document généré : {path}",
     },
     "en": {
@@ -142,6 +145,7 @@ LABELS = {
         "section_sources":      "Knowledge sources",
         "section_starters":     "Starter prompts",
         "section_disclaimer":   "Disclaimer",
+        "section_next_steps":   "Recommended next steps",
         "field_name":           "Name",
         "field_description":    "Description",
         "field_instructions":   "Instructions",
@@ -168,7 +172,7 @@ LABELS = {
             ("Test in Preview mode",           "Run a few starters, refine as needed"),
             ("Publish and share",              "Share with your target users"),
         ],
-        "footer":               "Document generated on {date}   ·   Microsoft 365 Copilot Agent Builder   ·   https://m365.cloud.microsoft/chat/agent/new",
+        "footer":               "Document generated on {date}   ·   Microsoft 365 Copilot Agent Builder   ·   v{version}",
         "success":              "✅ Document generated: {path}",
     },
     "de": {
@@ -185,6 +189,7 @@ LABELS = {
         "section_sources":      "Wissensquellen",
         "section_starters":     "Startvorschläge",
         "section_disclaimer":   "Disclaimer",
+        "section_next_steps":   "Empfohlene nächste Schritte",
         "field_name":           "Name",
         "field_description":    "Beschreibung",
         "field_instructions":   "Anweisungen",
@@ -211,8 +216,163 @@ LABELS = {
             ("Im Preview-Modus testen",        "Startvorschläge ausprobieren, bei Bedarf anpassen"),
             ("Veröffentlichen und teilen",     "An die Zielnutzer:innen verteilen"),
         ],
-        "footer":               "Dokument erstellt am {date}   ·   Microsoft 365 Copilot Agent Builder   ·   https://m365.cloud.microsoft/chat/agent/new",
+        "footer":               "Dokument erstellt am {date}   ·   Microsoft 365 Copilot Agent Builder   ·   v{version}",
         "success":              "✅ Dokument erstellt: {path}",
+    },
+}
+
+
+# ── Next-step recommendations per agent type ────────────────────────────────────
+NEXT_STEPS = {
+    "en": {
+        "hr": [
+            "Upload your HR policies, employee handbook, and org chart to SharePoint.",
+            "Grant the agent access to the relevant SharePoint folder via the OneDrive & SharePoint capability.",
+            "Run a pilot with 5–10 HR team members before rolling out organisation-wide.",
+            "Schedule a monthly review of the instructions as policies evolve.",
+        ],
+        "it": [
+            "Centralise system documentation and technical FAQs in a shared SharePoint library.",
+            "Define escalation paths explicitly in the instructions (Tier 1 → Tier 2 → human).",
+            "Test edge cases: unknown errors, out-of-scope requests, sensitive data handling.",
+            "Monitor usage monthly to identify gaps in the knowledge base.",
+        ],
+        "sales": [
+            "Upload your pitch deck, price list, and objection FAQ to SharePoint.",
+            "Update knowledge sources quarterly as product catalogue and pricing change.",
+            "Include 2–3 real deal examples in the knowledge base to anchor the tone.",
+            "Brief the sales team with a 15-minute onboarding session before launch.",
+        ],
+        "legal": [
+            "Ensure all uploaded templates are the current approved versions.",
+            "Add an explicit out-of-scope rule: the agent provides information, not legal advice.",
+            "Have the legal team validate the instructions before going live.",
+            "Plan a quarterly review cycle aligned with regulatory update schedules.",
+        ],
+        "pm": [
+            "Upload your methodology templates and project glossary to SharePoint.",
+            "Align the starter prompts with your team's most common recurring tasks.",
+            "Test the agent on a live project before rolling out across all teams.",
+            "Encode escalation paths for blocked decisions or resource conflicts.",
+        ],
+        "writing": [
+            "Upload top-performing past articles and your editorial style guide.",
+            "Include 3–5 annotated examples showing the tone and structure you want.",
+            "Run the anti-pattern pass on the agent's first 10 outputs and refine the instructions.",
+            "Create a shared SharePoint folder for approved content samples to grow over time.",
+        ],
+        "data": [
+            "Enable the Code Interpreter capability for data analysis tasks.",
+            "Define the expected output format (tables, charts, summaries) in the instructions.",
+            "Upload data dictionaries and schema documentation to the knowledge base.",
+            "Add explicit instructions for handling missing data, outliers, and confidentiality.",
+        ],
+        "custom": [
+            "Review the instructions with a sample of target users before going live.",
+            "Identify the 3 most common user requests and optimise the starter prompts for them.",
+            "Schedule a 30-day checkpoint to review usage and refine the instructions.",
+            "Document the agent's scope and limitations in a shared team page.",
+        ],
+    },
+    "fr": {
+        "hr": [
+            "Chargez vos politiques RH, votre règlement intérieur et votre organigramme sur SharePoint.",
+            "Accordez à l'agent l'accès au dossier SharePoint concerné via la fonctionnalité OneDrive & SharePoint.",
+            "Effectuez un pilote avec 5 à 10 membres de l'équipe RH avant le déploiement à l'échelle.",
+            "Planifiez une révision mensuelle des instructions à mesure que les politiques évoluent.",
+        ],
+        "it": [
+            "Centralisez la documentation système et les FAQ techniques dans une bibliothèque SharePoint partagée.",
+            "Définissez les chemins d'escalade explicitement dans les instructions (Niveau 1 → Niveau 2 → humain).",
+            "Testez les cas limites : erreurs inconnues, demandes hors périmètre, gestion des données sensibles.",
+            "Consultez les journaux d'utilisation mensuellement pour identifier les lacunes dans la base de connaissances.",
+        ],
+        "sales": [
+            "Chargez votre pitch deck, liste de prix et FAQ objections sur SharePoint.",
+            "Mettez à jour les sources trimestriellement au rythme des évolutions produit et tarifaires.",
+            "Incluez 2 à 3 exemples réels de deals dans la base de connaissances pour ancrer le ton.",
+            "Briefez l'équipe commerciale avec une session d'onboarding de 15 minutes avant le lancement.",
+        ],
+        "legal": [
+            "Vérifiez que tous les modèles chargés sont bien les versions actuellement approuvées.",
+            "Ajoutez une règle hors périmètre explicite : l'agent donne des informations, pas des conseils juridiques.",
+            "Faites valider les instructions par l'équipe juridique avant la mise en production.",
+            "Planifiez un cycle de révision trimestriel aligné sur les calendriers de mise à jour réglementaire.",
+        ],
+        "pm": [
+            "Chargez vos modèles de méthodologie et votre glossaire projet sur SharePoint.",
+            "Alignez les suggestions de démarrage sur les tâches récurrentes les plus fréquentes de votre équipe.",
+            "Testez l'agent sur un projet en cours avant de le déployer à l'ensemble des équipes.",
+            "Encodez les chemins d'escalade pour les décisions bloquées ou les conflits de ressources.",
+        ],
+        "writing": [
+            "Chargez vos articles les plus performants et votre guide de style éditorial.",
+            "Incluez 3 à 5 exemples annotés montrant le ton et la structure souhaités.",
+            "Effectuez le passage anti-patterns sur les 10 premières productions de l'agent et affinez les instructions.",
+            "Créez un dossier SharePoint partagé pour les exemples de contenus validés, à enrichir au fil du temps.",
+        ],
+        "data": [
+            "Activez la fonctionnalité Code Interpreter pour les tâches d'analyse de données.",
+            "Définissez le format de sortie attendu (tableaux, graphiques, synthèses) dans les instructions.",
+            "Chargez les dictionnaires de données et la documentation des schémas dans la base de connaissances.",
+            "Ajoutez des instructions explicites pour gérer les données manquantes, les valeurs aberrantes et la confidentialité.",
+        ],
+        "custom": [
+            "Révisez les instructions avec un échantillon d'utilisateurs cibles avant le lancement.",
+            "Identifiez les 3 demandes les plus fréquentes et optimisez les suggestions de démarrage en conséquence.",
+            "Planifiez un point de contrôle à 30 jours pour analyser les usages et affiner les instructions.",
+            "Documentez le périmètre et les limites de l'agent dans une page d'équipe partagée.",
+        ],
+    },
+    "de": {
+        "hr": [
+            "Lade deine HR-Richtlinien, die Arbeitsordnung und das Organigramm auf SharePoint hoch.",
+            "Erteile dem Agenten Zugriff auf den relevanten SharePoint-Ordner via OneDrive & SharePoint.",
+            "Führe einen Pilottest mit 5–10 HR-Teammitgliedern durch, bevor du organisationsweit ausrollst.",
+            "Plane eine monatliche Überprüfung der Anweisungen, während sich Richtlinien weiterentwickeln.",
+        ],
+        "it": [
+            "Zentralisiere die Systemdokumentation und technische FAQs in einer gemeinsamen SharePoint-Bibliothek.",
+            "Definiere Eskalationspfade explizit in den Anweisungen (Stufe 1 → Stufe 2 → Mensch).",
+            "Teste Grenzfälle: unbekannte Fehler, Anfragen außerhalb des Bereichs, Umgang mit sensiblen Daten.",
+            "Überprüfe monatlich die Nutzungsprotokolle, um Lücken in der Wissensbasis zu identifizieren.",
+        ],
+        "sales": [
+            "Lade dein Pitch Deck, die Preisliste und die Einwände-FAQ auf SharePoint hoch.",
+            "Aktualisiere die Wissensquellen vierteljährlich entsprechend der Produkt- und Preisänderungen.",
+            "Füge 2–3 echte Deal-Beispiele in die Wissensbasis ein, um den Ton zu verankern.",
+            "Briefiere das Vertriebsteam mit einer 15-minütigen Onboarding-Session vor dem Start.",
+        ],
+        "legal": [
+            "Stelle sicher, dass alle hochgeladenen Vorlagen die aktuell genehmigten Versionen sind.",
+            "Füge eine explizite Außer-Bereich-Regel ein: Der Agent gibt Informationen, keine Rechtsberatung.",
+            "Koordiniere mit dem Rechtsteam, um die Anweisungen vor der Inbetriebnahme zu validieren.",
+            "Plane einen vierteljährlichen Überprüfungszyklus abgestimmt auf regulatorische Update-Zeitpläne.",
+        ],
+        "pm": [
+            "Lade deine Methodikvorlagen und das Projektglossar auf SharePoint hoch.",
+            "Stimme die Startvorschläge auf die häufigsten wiederkehrenden Aufgaben deines Teams ab.",
+            "Teste den Agenten mit einem laufenden Projekt, bevor du ihn in allen Teams ausrollst.",
+            "Kodiere Eskalationspfade für blockierte Entscheidungen oder Ressourcenkonflikte.",
+        ],
+        "writing": [
+            "Lade deine erfolgreichsten Artikel und deinen redaktionellen Style Guide hoch.",
+            "Füge 3–5 kommentierte Beispiele ein, die Ton und Struktur zeigen.",
+            "Führe den Anti-Muster-Durchgang bei den ersten 10 Ausgaben des Agenten durch und verfeinere die Anweisungen.",
+            "Richte einen gemeinsamen SharePoint-Ordner für freigegebene Inhaltsbeispiele ein.",
+        ],
+        "data": [
+            "Aktiviere die Funktion Code Interpreter für Datenanalyseaufgaben.",
+            "Definiere das erwartete Ausgabeformat (Tabellen, Diagramme, Zusammenfassungen) in den Anweisungen.",
+            "Lade Datenwörterbücher und Schema-Dokumentation in die Wissensbasis hoch.",
+            "Füge explizite Anweisungen für den Umgang mit fehlenden Daten, Ausreißern und Vertraulichkeit hinzu.",
+        ],
+        "custom": [
+            "Überprüfe die Anweisungen mit einer Auswahl von Zielnutzern vor dem Launch.",
+            "Identifiziere die 3 häufigsten Nutzeranfragen und optimiere die Startvorschläge dafür.",
+            "Plane einen 30-Tage-Kontrollpunkt, um Nutzung zu überprüfen und Anweisungen zu verfeinern.",
+            "Dokumentiere den Bereich und die Grenzen des Agenten auf einer gemeinsamen Team-Seite.",
+        ],
     },
 }
 
@@ -220,20 +380,20 @@ LABELS = {
 # ── XML helpers ─────────────────────────────────────────────────────────────────
 
 # Pre-compute qualified names to avoid repeated qn() calls (micro-optimization)
-_QN_RFONTS = qn('w:rFonts')
-_QN_ASCII = qn('w:ascii')
-_QN_HANSI = qn('w:hAnsi')
+_QN_RFONTS   = qn('w:rFonts')
+_QN_ASCII    = qn('w:ascii')
+_QN_HANSI    = qn('w:hAnsi')
 _QN_EASTASIA = qn('w:eastAsia')
-_QN_CS = qn('w:cs')
-_QN_VAL = qn('w:val')
-_QN_SZ = qn('w:sz')
-_QN_SPACE = qn('w:space')
-_QN_COLOR = qn('w:color')
-_QN_PBDR = qn('w:pBdr')
-_QN_BOTTOM = qn('w:bottom')
-_QN_LEFT = qn('w:left')
-_QN_SHD = qn('w:shd')
-_QN_FILL = qn('w:fill')
+_QN_CS       = qn('w:cs')
+_QN_VAL      = qn('w:val')
+_QN_SZ       = qn('w:sz')
+_QN_SPACE    = qn('w:space')
+_QN_COLOR    = qn('w:color')
+_QN_PBDR     = qn('w:pBdr')
+_QN_BOTTOM   = qn('w:bottom')
+_QN_LEFT     = qn('w:left')
+_QN_SHD      = qn('w:shd')
+_QN_FILL     = qn('w:fill')
 
 def set_run_font(run, font_name, size_pt, bold=False, color=None, italic=False):
     run.font.name = font_name
@@ -244,7 +404,6 @@ def set_run_font(run, font_name, size_pt, bold=False, color=None, italic=False):
         run.font.color.rgb = color
     rPr = run._r.get_or_add_rPr()
 
-    # Check if rFonts already exists before creating new one
     existing = rPr.find(_QN_RFONTS)
     if existing is not None:
         rPr.remove(existing)
@@ -312,7 +471,6 @@ def add_section_title(doc, text, emoji=""):
     run = p.add_run(label)
     set_run_font(run, FONT_TITLE, SIZE_H1, bold=True, color=ORANGE)
 
-    # Add bottom border using pre-computed qn values
     pPr = p._p.get_or_add_pPr()
     pBdr = OxmlElement('w:pBdr')
     bottom = OxmlElement('w:bottom')
@@ -339,32 +497,25 @@ def add_field_block(doc, field_name, content, char_limit=None, hint=None,
         sep = label_p.add_run(f"   {count} / {char_limit} {char_unit}")
         set_run_font(sep, FONT_TITLE, SIZE_META, color=GRAY)
 
-    is_empty = not content
+    is_empty   = not content
     display_text = content or not_set_text
-    lines = display_text.split('\n')
+    lines      = display_text.split('\n')
 
-    # Pre-compute formatting parameters to avoid repeated calculations in loop
-    font_color = GRAY if is_empty else DARK
-    left_indent = Cm(0.4)
-    right_indent = Cm(0.2)
-    space_before_subsequent = Pt(2)
-    space_after = Pt(2)
+    font_color        = GRAY if is_empty else DARK
+    left_indent       = Cm(0.4)
+    right_indent      = Cm(0.2)
+    space_before_next = Pt(2)
+    space_after       = Pt(2)
 
     for i, line in enumerate(lines):
         cp = doc.add_paragraph()
-        cp.paragraph_format.space_before = space_before_subsequent if i > 0 else Pt(0)
+        cp.paragraph_format.space_before = space_before_next if i > 0 else Pt(0)
         cp.paragraph_format.space_after  = space_after
         cp.paragraph_format.left_indent  = left_indent
         cp.paragraph_format.right_indent = right_indent
 
         run = cp.add_run(line if line.strip() else " ")
-        set_run_font(
-            run,
-            FONT_BODY,
-            SIZE_BODY,
-            color=font_color,
-            italic=is_empty
-        )
+        set_run_font(run, FONT_BODY, SIZE_BODY, color=font_color, italic=is_empty)
         set_para_shading(cp, "F5F5F5")
         add_left_border(cp)
 
@@ -403,12 +554,36 @@ def _get(config, *keys, default=""):
     return next((config[k] for k in keys if k in config and config[k] not in (None, "")), default)
 
 
-def generate_document(config: dict, output_path: str):
+def _validate_config(config: dict) -> None:
+    """Raise ValueError for missing required fields."""
+    name         = _get(config, "name", "nom")
+    instructions = _get(config, "instructions")
+    missing = []
+    if not name:
+        missing.append("name")
+    if not instructions:
+        missing.append("instructions")
+    if missing:
+        raise ValueError(f"Config missing required field(s): {', '.join(missing)}")
+    lang = str(config.get("lang", "en")).lower()
+    if lang not in LABELS:
+        print(f"Warning: unknown lang '{lang}', defaulting to 'en'", file=sys.stderr)
+
+
+def generate_document(config: dict, output_path: str) -> str:
+    _validate_config(config)
+
     lang = str(config.get("lang", "en")).lower()
     if lang not in LABELS:
         lang = "en"
-    L = LABELS[lang]
+    L           = LABELS[lang]
     caps_labels = CAPABILITIES_LABELS[lang]
+
+    # Resolve output path; avoid collisions with a microsecond timestamp suffix
+    out = Path(output_path).resolve()
+    if out.exists():
+        ts  = datetime.now().strftime("%H%M%S%f")
+        out = out.with_name(f"{out.stem}_{ts}{out.suffix}")
 
     doc = Document()
 
@@ -481,7 +656,6 @@ def generate_document(config: dict, output_path: str):
     add_section_title(doc, L["section_capabilities"], "⚙️")
 
     caps = _get(config, "capabilities", "fonctionnalites", default=[]) or []
-    # Build capabilities text more efficiently
     if caps:
         caps_text = "\n".join(f"✅  {caps_labels.get(c, c)}" for c in caps)
     else:
@@ -531,6 +705,33 @@ def generate_document(config: dict, output_path: str):
                         not_set_text=L["not_set"], char_unit=L["char_unit"])
 
     # ══════════════════════════════════════════════════
+    # NEXT STEPS
+    # ══════════════════════════════════════════════════
+    agent_type = str(config.get("agent_type", "custom")).lower()
+    lang_steps = NEXT_STEPS.get(lang, NEXT_STEPS["en"])
+    if agent_type not in lang_steps:
+        agent_type = "custom"
+    steps = lang_steps[agent_type]
+
+    add_rule(doc, before_pt=24, after_pt=16, color="FF5119")
+
+    ns_title = doc.add_paragraph()
+    ns_title.paragraph_format.space_before = Pt(0)
+    ns_title.paragraph_format.space_after  = Pt(10)
+    ns_run = ns_title.add_run(L["section_next_steps"].upper())
+    set_run_font(ns_run, FONT_TITLE, SIZE_H1, bold=True, color=ORANGE)
+
+    for step in steps:
+        sp = doc.add_paragraph()
+        sp.paragraph_format.space_before = Pt(4)
+        sp.paragraph_format.space_after  = Pt(4)
+        sp.paragraph_format.left_indent  = Cm(0.2)
+        arrow    = sp.add_run("→  ")
+        step_run = sp.add_run(step)
+        set_run_font(arrow,    FONT_TITLE, SIZE_BODY, bold=True, color=ORANGE)
+        set_run_font(step_run, FONT_BODY,  SIZE_BODY, color=DARK)
+
+    # ══════════════════════════════════════════════════
     # CHECKLIST
     # ══════════════════════════════════════════════════
     add_rule(doc, before_pt=24, after_pt=16, color="FF5119")
@@ -547,26 +748,30 @@ def generate_document(config: dict, output_path: str):
         cp.paragraph_format.space_after  = Pt(4)
         cp.paragraph_format.left_indent  = Cm(0.2)
 
-        checkbox = cp.add_run("☐  ")
-        set_run_font(checkbox, FONT_TITLE, SIZE_BODY, bold=True, color=ORANGE)
-
-        label_run = cp.add_run(label)
-        set_run_font(label_run, FONT_TITLE, SIZE_BODY, bold=True, color=DARK)
-
+        checkbox   = cp.add_run("☐  ")
+        label_run  = cp.add_run(label)
         detail_run = cp.add_run(f"  —  {detail}")
-        set_run_font(detail_run, FONT_BODY, SIZE_BODY, color=GRAY)
+        set_run_font(checkbox,   FONT_TITLE, SIZE_BODY, bold=True, color=ORANGE)
+        set_run_font(label_run,  FONT_TITLE, SIZE_BODY, bold=True, color=DARK)
+        set_run_font(detail_run, FONT_BODY,  SIZE_BODY, color=GRAY)
 
     foot = doc.add_paragraph()
     foot.paragraph_format.space_before = Pt(24)
     foot.paragraph_format.space_after  = Pt(0)
     foot.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    foot_run = foot.add_run(L["footer"].format(date=date_str))
+    foot_run = foot.add_run(L["footer"].format(date=date_str, version=VERSION))
     set_run_font(foot_run, FONT_TITLE, SIZE_SMALL, color=GRAY)
 
-    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-    doc.save(output_path)
-    print(L["success"].format(path=output_path))
-    return output_path
+    out.parent.mkdir(parents=True, exist_ok=True)
+    doc.save(str(out))
+
+    # Export config alongside .docx for reference
+    json_out = out.with_suffix(".json")
+    with open(json_out, "w", encoding="utf-8") as jf:
+        json.dump(config, jf, ensure_ascii=False, indent=2)
+
+    print(L["success"].format(path=str(out)))
+    return str(out)
 
 
 if __name__ == "__main__":
@@ -574,8 +779,13 @@ if __name__ == "__main__":
         print("Usage: python generate_docx.py <config.json> <output.docx>")
         sys.exit(1)
 
-    config_path  = sys.argv[1]
-    output_path  = sys.argv[2]
+    config_path = sys.argv[1]
+    output_path = sys.argv[2]
+
+    config_size = Path(config_path).stat().st_size
+    if config_size > 1_048_576:  # 1 MB
+        print("Error: config file exceeds 1 MB limit", file=sys.stderr)
+        sys.exit(1)
 
     with open(config_path, "r", encoding="utf-8") as f:
         config = json.load(f)

@@ -1,5 +1,6 @@
 ---
 name: copilot-agent-builder
+version: "2.0.0"
 description: "Interactive guide to create a Microsoft 365 Copilot agent via Agent Builder (https://m365.cloud.microsoft/chat/agent/new). Supports English, French and German — the skill asks the user which language to use as its very first question, then runs the whole flow in the chosen language. Trigger on: create Copilot agent, Microsoft 365 agent, M365 agent, Copilot agent, configure a Copilot agent, prepare a Copilot agent, new Copilot agent, build Copilot agent, Agent Builder, créer un agent Copilot, nouvel agent M365, agent Microsoft 365, configurer un agent Copilot, Agent Builder Copilot, Copilot Agent erstellen, Microsoft 365 Agent, M365 Agent, Copilot Agent konfigurieren, neuen Copilot Agent, Agent Builder Copilot. The skill asks targeted questions, proposes concrete content for each field, lists the knowledge sources needed for the agent to perform well, and produces a Word (.docx) document ready to paste into the Agent Builder UI."
 ---
 
@@ -102,6 +103,40 @@ Pick the 3–4 most relevant questions from the bank below, based on what Phase 
 **On data and knowledge:**
 - "Do you already have documents (style guide, FAQ, examples, charter…) the agent could use?"
 - "Does the agent need real-time information (web, recent emails, Teams messages)?"
+
+### PHASE 2b — Agent type (template selection)
+
+Before generating fields, establish the agent type. Send exactly this message:
+
+> **Agent type — optional template**
+>
+> I can tune the field generation and the document's next-steps section to your use case. Which type fits best?
+>
+> 1. **HR / Onboarding** — employee handbook, policies, FAQ, org chart
+> 2. **IT / Technical support** — procedures, technical FAQ, escalation paths
+> 3. **Sales** — pitch, product catalogue, objection handling
+> 4. **Legal** — contracts, compliance, internal FAQ
+> 5. **Project management** — methodology, planning, team coordination
+> 6. **Writing / Editorial** — drafting, style guide, anti-pattern control
+> 7. **Data / Analysis** — data interpretation, reporting, code execution
+> 8. **Custom** — no template, I'll configure from scratch
+>
+> Reply with a number (1–8), or describe your use case if none fits exactly.
+
+Map the chosen type to the `agent_type` JSON field:
+
+| Choice | `agent_type` value |
+|---|---|
+| 1 — HR / Onboarding | `hr` |
+| 2 — IT / Technical | `it` |
+| 3 — Sales | `sales` |
+| 4 — Legal | `legal` |
+| 5 — Project management | `pm` |
+| 6 — Writing / Editorial | `writing` |
+| 7 — Data / Analysis | `data` |
+| 8 — Custom | `custom` |
+
+This value controls the **Recommended Next Steps** section of the generated document.
 
 ### PHASE 3 — Field generation (interactive, field by field)
 
@@ -321,8 +356,8 @@ Once every field is validated, generate the Word document using `scripts/generat
 
 | Element | Value |
 |---|---|
-| Font for titles / labels | Outfit |
-| Font for body / content | Petrona |
+| Font for titles / labels | Calibri |
+| Font for body / content | Georgia |
 | Accent colour | `#FF5119` (orange) — section titles, agent name, numbers, rules |
 | Body text colour | `#1A1A1A` (near-black) |
 | Labels / hints colour | `#888888` (mid-grey) |
@@ -347,15 +382,28 @@ Pass the validated data as a temporary JSON file `/tmp/agent_config.json`:
   "starters": [
     {"title": "...", "text": "..."}
   ],
-  "disclaimer": "..."
+  "disclaimer": "...",
+  "agent_type": "hr"
 }
 ```
 
+Replace `"agent_type"` value with the key chosen in Phase 2b (`hr`, `it`, `sales`, `legal`, `pm`, `writing`, `data`, or `custom`).
+
 Then run:
 ```bash
-pip install python-docx --break-system-packages -q
+pip install python-docx --user -q
 python scripts/generate_docx.py /tmp/agent_config.json ./agent_[name].docx
 ```
+
+**If the generator fails:** show the user the raw JSON so they can copy-paste each field manually:
+
+> The document generator encountered an error. Here is your complete configuration — use it to fill in the Agent Builder fields manually:
+>
+> ```json
+> [paste the full /tmp/agent_config.json content here]
+> ```
+>
+> You can also retry by running the script again, or save this JSON for later.
 
 Finish with this message:
 
@@ -417,6 +465,40 @@ Wähle 3 bis 4 der relevantesten Fragen aus dem folgenden Katalog, abhängig dav
 **Zu Daten und Wissen:**
 - „Gibt es bereits Dokumente (Leitfaden, FAQ, Beispiele, Charta…), die der Agent nutzen kann?"
 - „Braucht der Agent Echtzeit-Informationen (Web, neueste E-Mails, Teams-Nachrichten)?"
+
+### PHASE 2b — Agententyp (Vorlagenauswahl)
+
+Bevor du die Felder erzeugst, stelle den Agententyp fest. Sende genau diese Nachricht:
+
+> **Agententyp — optionale Vorlage**
+>
+> Ich kann die Felder und den Abschnitt „Empfohlene nächste Schritte" im Dokument auf deinen Anwendungsfall abstimmen. Welcher Typ passt am besten?
+>
+> 1. **HR / Onboarding** — Arbeitsordnung, Richtlinien, FAQ, Organigramm
+> 2. **IT / Technischer Support** — Prozesse, technische FAQ, Eskalationspfade
+> 3. **Vertrieb / Sales** — Pitch, Produktkatalog, Einwandbehandlung
+> 4. **Recht / Legal** — Verträge, Compliance, interne FAQ
+> 5. **Projektmanagement** — Methodik, Planung, Teamkoordination
+> 6. **Redaktion / Writing** — Texterstellung, Style Guide, Anti-Muster-Kontrolle
+> 7. **Daten / Analyse** — Dateninterpretation, Reporting, Code-Ausführung
+> 8. **Custom** — keine Vorlage, individuelle Konfiguration
+>
+> Antworte mit einer Zahl (1–8) oder beschreibe deinen Anwendungsfall, wenn keine Option genau passt.
+
+Ordne den gewählten Typ dem `agent_type`-Feld in der JSON-Konfiguration zu:
+
+| Wahl | `agent_type`-Wert |
+|---|---|
+| 1 — HR / Onboarding | `hr` |
+| 2 — IT / Technik | `it` |
+| 3 — Vertrieb | `sales` |
+| 4 — Recht | `legal` |
+| 5 — Projektmanagement | `pm` |
+| 6 — Redaktion | `writing` |
+| 7 — Daten / Analyse | `data` |
+| 8 — Custom | `custom` |
+
+Dieser Wert steuert den Abschnitt **Empfohlene nächste Schritte** im erzeugten Dokument.
 
 ### PHASE 3 — Felder erzeugen (interaktiv, Feld für Feld)
 
@@ -635,8 +717,8 @@ Sobald alle Felder bestätigt sind, erzeuge das Word-Dokument mit `scripts/gener
 
 | Element | Wert |
 |---|---|
-| Schrift für Titel / Labels | Outfit |
-| Schrift für Fließtext / Inhalt | Petrona |
+| Schrift für Titel / Labels | Calibri |
+| Schrift für Fließtext / Inhalt | Georgia |
 | Akzentfarbe | `#FF5119` (Orange) — Abschnittstitel, Agentname, Nummern, Linien |
 | Fließtextfarbe | `#1A1A1A` (nahezu Schwarz) |
 | Farbe für Labels / Hinweise | `#888888` (mittleres Grau) |
@@ -661,15 +743,28 @@ Sobald alle Felder bestätigt sind, erzeuge das Word-Dokument mit `scripts/gener
   "starters": [
     {"title": "...", "text": "..."}
   ],
-  "disclaimer": "..."
+  "disclaimer": "...",
+  "agent_type": "hr"
 }
 ```
 
+Ersetze den Wert von `"agent_type"` durch den in Phase 2b gewählten Schlüssel (`hr`, `it`, `sales`, `legal`, `pm`, `writing`, `data` oder `custom`).
+
 Dann führe aus:
 ```bash
-pip install python-docx --break-system-packages -q
+pip install python-docx --user -q
 python scripts/generate_docx.py /tmp/agent_config.json ./agent_[name].docx
 ```
+
+**Falls der Generator fehlschlägt:** Zeige dem Benutzer das rohe JSON, damit er die Felder manuell einfügen kann:
+
+> Der Dokumentgenerator ist auf einen Fehler gestoßen. Hier ist deine vollständige Konfiguration — verwende sie, um die Felder im Agent Builder manuell auszufüllen:
+>
+> ```json
+> [vollständigen Inhalt von /tmp/agent_config.json hier einfügen]
+> ```
+>
+> Du kannst das Skript auch erneut ausführen oder dieses JSON für später speichern.
 
 Schließe mit dieser Nachricht ab:
 
@@ -731,6 +826,40 @@ Sélectionne 3 à 4 des questions les plus pertinentes du catalogue ci-dessous, 
 **Sur les données et les connaissances :**
 - « As-tu déjà des documents (guide de style, FAQ, exemples, charte…) que l'agent pourrait utiliser ? »
 - « L'agent a-t-il besoin d'informations en temps réel (web, e-mails récents, messages Teams) ? »
+
+### PHASE 2b — Type d'agent (sélection de modèle)
+
+Avant de générer les champs, identifie le type d'agent. Envoie exactement ce message :
+
+> **Type d'agent — modèle optionnel**
+>
+> Je peux adapter la génération des champs et la section « Prochaines étapes recommandées » du document à ton cas d'usage. Quel type correspond le mieux ?
+>
+> 1. **RH / Onboarding** — règlement intérieur, politiques, FAQ, organigramme
+> 2. **IT / Support technique** — procédures, FAQ technique, chemins d'escalade
+> 3. **Ventes / Sales** — pitch, catalogue produits, traitement des objections
+> 4. **Juridique / Legal** — contrats, conformité, FAQ interne
+> 5. **Gestion de projet** — méthodologie, planning, coordination d'équipe
+> 6. **Rédaction / Editorial** — rédaction, guide de style, contrôle anti-patterns
+> 7. **Données / Analyse** — interprétation de données, reporting, exécution de code
+> 8. **Custom** — pas de modèle, configuration de zéro
+>
+> Réponds avec un chiffre (1–8) ou décris ton cas d'usage si aucune option ne correspond exactement.
+
+Associe le type choisi au champ `agent_type` dans la configuration JSON :
+
+| Choix | Valeur `agent_type` |
+|---|---|
+| 1 — RH / Onboarding | `hr` |
+| 2 — IT / Technique | `it` |
+| 3 — Ventes | `sales` |
+| 4 — Juridique | `legal` |
+| 5 — Gestion de projet | `pm` |
+| 6 — Rédaction | `writing` |
+| 7 — Données / Analyse | `data` |
+| 8 — Custom | `custom` |
+
+Cette valeur contrôle la section **Prochaines étapes recommandées** du document généré.
 
 ### PHASE 3 — Génération des champs (interactive, champ par champ)
 
@@ -950,8 +1079,8 @@ Une fois tous les champs validés, génère le document Word avec `scripts/gener
 
 | Élément | Valeur |
 |---|---|
-| Police pour les titres / labels | Outfit |
-| Police pour le corps / contenu | Petrona |
+| Police pour les titres / labels | Calibri |
+| Police pour le corps / contenu | Georgia |
 | Couleur d'accent | `#FF5119` (orange) — titres de sections, nom de l'agent, numéros, lignes |
 | Couleur du corps de texte | `#1A1A1A` (presque noir) |
 | Couleur des labels / indications | `#888888` (gris moyen) |
@@ -976,15 +1105,28 @@ Transmets les données validées sous forme de fichier JSON temporaire `/tmp/age
   "starters": [
     {"title": "...", "text": "..."}
   ],
-  "disclaimer": "..."
+  "disclaimer": "...",
+  "agent_type": "hr"
 }
 ```
 
+Remplace la valeur de `"agent_type"` par la clé choisie en Phase 2b (`hr`, `it`, `sales`, `legal`, `pm`, `writing`, `data` ou `custom`).
+
 Puis exécute :
 ```bash
-pip install python-docx --break-system-packages -q
+pip install python-docx --user -q
 python scripts/generate_docx.py /tmp/agent_config.json ./agent_[nom].docx
 ```
+
+**Si le générateur échoue :** montre à l'utilisateur le JSON brut pour qu'il puisse copier-coller chaque champ manuellement :
+
+> Le générateur de document a rencontré une erreur. Voici ta configuration complète — utilise-la pour remplir manuellement les champs dans l'Agent Builder :
+>
+> ```json
+> [coller ici le contenu complet de /tmp/agent_config.json]
+> ```
+>
+> Tu peux aussi relancer le script ou sauvegarder ce JSON pour plus tard.
 
 Termine avec ce message :
 

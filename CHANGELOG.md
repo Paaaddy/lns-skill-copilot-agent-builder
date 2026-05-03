@@ -20,6 +20,13 @@
 ### Fixed
 - Generator crash on systems where `--break-system-packages` is rejected
 - Document font rendering on systems without Outfit/Petrona installed
+- `subprocess.run()` pip bootstrap now raises on failure instead of silently proceeding to a cryptic `ImportError`
+
+### Performance
+- Pre-computed XML namespace `qn()` values cached at module level — eliminates repeated namespace resolution per paragraph
+
+### Tests
+- 18-test pytest suite (`tests/test_generator.py`) — unit tests for `_get` and `_validate_config`, integration tests covering all 3 languages, all 8 agent types, collision prevention, JSON export, legacy French keys, max-length fields, and unknown lang/type fallbacks
 
 ## [1.1.0] — 2026-04-17 (fork)
 

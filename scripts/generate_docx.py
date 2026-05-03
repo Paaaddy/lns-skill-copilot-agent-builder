@@ -21,7 +21,7 @@ try:
 except ImportError:
     print("Installing python-docx...")
     import subprocess
-    subprocess.run([sys.executable, "-m", "pip", "install", "python-docx", "--user", "-q"])
+    subprocess.run([sys.executable, "-m", "pip", "install", "python-docx", "--user", "-q"], check=True)
     from docx import Document
     from docx.shared import Pt, Cm, RGBColor
     from docx.enum.text import WD_ALIGN_PARAGRAPH

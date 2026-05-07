@@ -11,8 +11,9 @@ The skill asks the right questions in order, then generates every Agent Builder 
 1. **Language selection** — English, French or German
 2. **Discovery** — the agent's role and its users
 3. **Deep dive** — tasks, tone, constraints, available data
-4. **Field generation** — name, description, instructions, capabilities, knowledge sources, starter prompts, disclaimer
-5. **Word document** — a formatted `.docx`, ready to paste into the Agent Builder
+4. **Agent type** — choose from 8 templates (HR, IT, Sales, Legal, PM, Writing, Data, Custom)
+5. **Field generation** — name, description, instructions, capabilities, knowledge sources, starter prompts, disclaimer
+6. **Word document** — a formatted `.docx` with a **Recommended Next Steps** section tailored to the chosen agent type, ready to paste into the Agent Builder
 
 ## Install
 
@@ -91,8 +92,9 @@ Le skill pose les bonnes questions dans l'ordre, puis génère chaque champ de l
 1. **Choix de la langue** — anglais, français ou allemand
 2. **Découverte** — le rôle de l'agent et ses utilisateurs
 3. **Approfondissement** — tâches, ton, contraintes, données disponibles
-4. **Génération des champs** — nom, description, instructions, fonctionnalités, sources de connaissances, suggestions de démarrage, disclaimer
-5. **Document Word** — un fichier `.docx` mis en forme, prêt à coller dans l'Agent Builder
+4. **Type d'agent** — choisir parmi 8 modèles (RH, IT, Ventes, Juridique, PM, Rédaction, Données, Personnalisé)
+5. **Génération des champs** — nom, description, instructions, fonctionnalités, sources de connaissances, suggestions de démarrage, disclaimer
+6. **Document Word** — un fichier `.docx` mis en forme avec une section **Prochaines étapes recommandées** adaptée au type d'agent choisi, prêt à coller dans l'Agent Builder
 
 ## Installation
 

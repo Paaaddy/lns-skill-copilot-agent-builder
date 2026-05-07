@@ -6,45 +6,57 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A Claude skill that guides users through creating a Microsoft 365 Copilot agent. No build system — it's a skill distribution package installed via `install.sh`. The two runtime files are `SKILL.md` (conversational logic) and `scripts/generate_docx.py` (Word document generator). Supports English, French, and German.
 
-## No Build/Test/Lint Commands
+## Testing
 
-This project has none. Changes are tested by invoking the skill manually in Claude and running through the flow.
+```bash
+pytest tests/test_generator.py            # unit + integration tests for the generator
+pytest tests/test_generator.py -m unit    # unit tests only (no docx I/O)
+```
 
-To test the doc generator in isolation:
+`python-docx` auto-installs via `subprocess` if missing. To test the generator in isolation:
 ```bash
 python scripts/generate_docx.py /tmp/agent_config.json ./test_output.docx
 ```
 
-The script auto-installs `python-docx` if missing.
+Skill flow changes (SKILL.md) must be tested manually by running the skill in Claude.
+
+## Skill Trigger
+
+- Slash command: `/copilot-agent-builder`
+- Auto-trigger phrases (EN/FR/DE): "create a Copilot agent", "M365 agent", "Agent Builder", "créer un agent Copilot", "Copilot Agent erstellen", "neuen Copilot Agent"
 
 ## Architecture
 
 **Two-part system:**
 
-1. **`SKILL.md`** — Full conversational instructions for Claude. Contains three complete parallel versions: English, French, and German. Controls the 4-phase flow:
+1. **`SKILL.md`** — Full conversational instructions for Claude. Has a YAML frontmatter block (`name`, `description`, trigger phrases) followed by three complete parallel versions: English, French, German. Controls the 4-phase flow:
    - Phase 0: Language selection (EN/FR/DE) — always first, drives everything after
    - Phase 1: Single open discovery question
    - Phase 2: 3–4 targeted follow-up questions
+   - Phase 2b: Agent type picker (8 types → sets `agent_type` in JSON config)
    - Phase 3: Six sequential field proposals (name/description → instructions → capabilities → knowledge sources → starter prompts → disclaimer), each proposed then validated before advancing
    - Phase 4: Collects validated data, writes `/tmp/agent_config.json`, calls `generate_docx.py`
 
-2. **`scripts/generate_docx.py`** — Reads JSON config, generates a formatted `.docx`. The `lang` field ("en"/"fr"/"de") switches all UI strings. Has fallback keys for backward compatibility with legacy French JSON keys (`nom`, `fonctionnalites`, etc.).
+2. **`scripts/generate_docx.py`** — Reads JSON config, generates a formatted `.docx`. The `lang` field ("en"/"fr"/"de") switches all UI strings. Uses a `_get(config, *keys)` helper that falls back through multiple key names for backward compatibility with legacy French JSON keys (`nom`, `fonctionnalites`, `sources_connaissances`, `suggestions_demarrage`).
 
 **JSON config structure** passed between skill and generator:
 ```json
 {
-  "lang": "en" | "de",
+  "lang": "en" | "fr" | "de",
   "name": "...",
   "description": "...",
   "instructions": "...",
-  "capabilities": ["WebSearch", "OneDriveAndSharePoint", ...],
+  "capabilities": ["WebSearch", "OneDriveAndSharePoint", "..."],
   "knowledge_sources": ["url1", ...],
   "starters": [{"title": "...", "text": "..."}, ...],
-  "disclaimer": "..."
+  "disclaimer": "...",
+  "agent_type": "hr"
 }
 ```
 
-**Design system** (hardcoded in generator): Outfit font (titles), Petrona (body), orange accent `#FF5119`, 2.5cm margins.
+`agent_type` values: `hr`, `it`, `sales`, `legal`, `pm`, `writing`, `data`, `custom` — controls the **Recommended Next Steps** section in the document. Defaults to `custom` if omitted or unrecognised.
+
+**Design system** (hardcoded in generator): Calibri font (titles), Georgia (body), orange accent `#FF5119`, 2.5cm margins.
 
 ## Key Constraints Encoded in SKILL.md
 
@@ -64,10 +76,20 @@ The script auto-installs `python-docx` if missing.
 | Starter prompts | 12 max |
 | Disclaimer | 500 chars |
 
-## Installation
+## Capabilities (Agent Builder)
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/Paaaddy/lns-skill-copilot-agent-builder/main/install.sh | bash
-```
+All capabilities supported by the generator — use exact key strings in the JSON:
 
-Auto-detects Claude Cowork (`~/Documents/Claude/Skills/`) vs Claude Code (`~/.claude/skills/`).
+| Key | EN label |
+|---|---|
+| `WebSearch` | Web search |
+| `OneDriveAndSharePoint` | OneDrive & SharePoint |
+| `Email` | Email |
+| `TeamsMessages` | Teams messages |
+| `People` | People |
+| `Meetings` | Meetings |
+| `GraphicArt` | Image creation |
+| `CodeInterpreter` | Code interpreter |
+| `Dataverse` | Dataverse |
+
+Unknown keys pass through as-is (no label translation).
